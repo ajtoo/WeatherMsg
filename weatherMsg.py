@@ -23,7 +23,7 @@ def readSendInfo():
 	"""gets email, password, and email that points to text messaging endpoint"""
 	info = [line.rstrip('\n') for line in open('.email', 'r')]
 	return info
-	
+
 def getForecast(latitude, longitude):
 	"""calls to api to get the weather, returns JSON with data contained"""
 	apiKey = readAPIKey()
@@ -31,6 +31,16 @@ def getForecast(latitude, longitude):
 	r = requests.get(url)
 	rJSON = json.loads(r.text)
 	return rJSON
+
+def sendMessage(sendInfo, message):
+	"""sendInfo should be a list in the order of:[sending email, password, target email]"""
+	server = smtplib.SMTP('smtp.gmail.com:587')
+	server.ehlo()
+	server.starttls()
+	server.login(sendInfo[0], sendInfo[1])
+	result = server.sendmail(sendInfo[0], [sendInfo[2]], message)
+	print(result)
+	server.quit()
 
 def printReport(weatherJSON):
 	"""print weather report from JSON object in a non-JSON format"""
@@ -40,4 +50,13 @@ def printReport(weatherJSON):
 	print(weekForecast)
 
 
-readSendInfo()
+sendInfo = readSendInfo()
+msg = "\r\n".join([
+  "From: %s" % sendInfo[0],
+  "To: %s" % sendInfo[2],
+  "Subject:",
+  "",
+  "old man, how is it that you hear these things? / young man how is it that you do not?"
+  ])
+print(msg)
+sendMessage(sendInfo, msg)
