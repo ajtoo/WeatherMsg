@@ -5,9 +5,8 @@ import smtplib
 FORECAST_URL = "https://api.forecast.io/forecast/"
 
 def main():
-	testLat = 38.539352
-	testLong = -121.728444
-	replyJSON = getForecast(testLat, testLong)
+	coords = getLatLong()
+	replyJSON = getForecast(coords[0], coords[1])
 	#print(json.dumps(rJSON, sort_keys = True, indent=4, separators=(',', ': ')))		#[DEBUG]
 	#printReport(replyJSON)
 	sendInfo = readSendInfo()
@@ -58,11 +57,13 @@ def sendMessage(sendInfo, message):
 	#print(result)
 	server.quit()
 
-def printReport(weatherJSON):
-	"""print weather report from JSON object in a non-JSON format"""
-	currentData = weatherJSON['currently']
-	weekForecast = weatherJSON['daily']
-	print(currentData)
-	print(weekForecast)
+def getLatLong():
+	send_url = 'http://freegeoip.net/json'
+	r = requests.get(send_url)
+	j = json.loads(r.text)
+	lat = j['latitude']
+	lon = j['longitude']
+	retList = [lat, lon]
+	return retList
 
 main()
