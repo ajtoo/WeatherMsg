@@ -9,9 +9,18 @@ def main():
 	testLong = -121.728444
 	replyJSON = getForecast(testLat, testLong)
 	#print(json.dumps(rJSON, sort_keys = True, indent=4, separators=(',', ': ')))		#[DEBUG]
-	printReport(replyJSON)
-	print("hit [enter] to close this dialogue")
-	input()
+	#printReport(replyJSON)
+	sendInfo = readSendInfo()
+	rJSON = getForecast(testLat, testLong)
+	msgTxt = parseForMessage(rJSON)
+	msg = "\r\n".join([
+	"From: %s" % sendInfo[0],
+	"To: %s" % sendInfo[2],
+	"Subject:",
+	"",
+	msgTxt
+	])
+	sendMessage(sendInfo, msg)
 
 def readAPIKey():
 	"""gets api key from hidden, read-only file; key is obtained by registering with The Dark SkyForecast"""
@@ -32,6 +41,13 @@ def getForecast(latitude, longitude):
 	rJSON = json.loads(r.text)
 	return rJSON
 
+def parseForMessage(jsonDict):
+	apparentTemp = jsonDict['currently']['apparentTemperature']
+	temp = jsonDict['currently']['temperature']
+	summary = jsonDict['currently']['summary']
+	msg = "\n" + summary + "\nApparent Temp: %f" % apparentTemp + "\ntemperature: %f" % temp + "\n"
+	return msg
+
 def sendMessage(sendInfo, message):
 	"""sendInfo should be a list in the order of:[sending email, password, target email]"""
 	server = smtplib.SMTP('smtp.gmail.com:587')
@@ -39,7 +55,7 @@ def sendMessage(sendInfo, message):
 	server.starttls()
 	server.login(sendInfo[0], sendInfo[1])
 	result = server.sendmail(sendInfo[0], [sendInfo[2]], message)
-	print(result)
+	#print(result)
 	server.quit()
 
 def printReport(weatherJSON):
@@ -49,14 +65,4 @@ def printReport(weatherJSON):
 	print(currentData)
 	print(weekForecast)
 
-
-sendInfo = readSendInfo()
-msg = "\r\n".join([
-  "From: %s" % sendInfo[0],
-  "To: %s" % sendInfo[2],
-  "Subject:",
-  "",
-  "old man, how is it that you hear these things? / young man how is it that you do not?"
-  ])
-print(msg)
-sendMessage(sendInfo, msg)
+main()
