@@ -10,7 +10,7 @@ def main():
 	#print(json.dumps(rJSON, sort_keys = True, indent=4, separators=(',', ': ')))		#[DEBUG]
 	#printReport(replyJSON)
 	sendInfo = readSendInfo()
-	rJSON = getForecast(testLat, testLong)
+	rJSON = getForecast(coords[0], coords[1])
 	msgTxt = parseForMessage(rJSON)
 	msg = "\r\n".join([
 	"From: %s" % sendInfo[0],
